@@ -1,5 +1,6 @@
 use std::collections::{BinaryHeap, HashMap};
 use std::cmp::Ordering;
+use serde::{Serialize, Deserialize};
 
 // Represents a state in the RCSPP algorithm
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -11,7 +12,7 @@ pub struct State {
 }
 
 // Represents information about a path leading to a state
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PathInfo {
     pub total_time: u32,
     pub pit_stops: Vec<(u32, usize)>,

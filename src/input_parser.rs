@@ -1,18 +1,22 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+use serde::{Serialize, Deserialize};
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CarConfig {
     pub fuel_capacity: u32,
     pub tyre_cost: u32,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Edge {
     pub u: usize,
     pub v: usize,
     pub distance: u32,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RaceData {
     pub n: usize,
     pub np: usize,
