@@ -3,6 +3,7 @@ use std::thread;
 use std::time::Duration;
 pub mod input_parser;
 pub mod graph_rcspp;
+pub mod visual;
 
 fn main() {
     println!("F1 Track Optimization System");
@@ -18,8 +19,16 @@ fn main() {
             println!("Successfully parsed input:");
             println!("Nodes: {}, Edges: {}, Pit Nodes: {}, Cars: {}", race_data.n, race_data.m, race_data.pit_nodes.len(), race_data.cars.len());
 
+            // Print graph visualization and export DOT (graphviz)
+            visual::print_graph_visualization(&race_data);
+            if let Err(e) = visual::export_dot(&race_data, "track.dot") {
+                eprintln!("Failed to export DOT: {}", e);
+            } else {
+                println!("Exported track graph DOT to {} (render with: dot -Tsvg track.dot -o track.svg)", "track.dot".green());
+            }
+
             let graph = graph_rcspp::Graph::new(race_data.n, &race_data.edges);
-            println!("Graph created with {} nodes and {} edges.", race_data.n, race_data.m);
+            println!("\nGraph created with {} nodes and {} edges.", race_data.n, race_data.m);
 
             if race_data.cars.is_empty() {
                 eprintln!("Error: No car configurations provided in the input.");
@@ -53,15 +62,15 @@ fn main() {
                     tyre_wear_distance,
                 ) {
                     Some(path_info) => {
-                        println!("\nOptimal Race Strategy Found:");
-                        println!("Minimum Total Race Time: {} units", path_info.total_time.to_string().color(car_color));
-                        println!("Pit Stop Schedule:");
-                        if path_info.pit_stops.is_empty() {
-                            println!("  No pit stops were made.");
+                        // Print race strategy visualization
+                        visual::print_race_strategy(i, &path_info, &race_data);
+                        // Export per-lap highlighted DOTs to images/
+                        let prefix = format!("car{}_laps", i + 1);
+                        if let Err(e) = visual::export_highlighted_dots(&race_data, &path_info, start_node, total_laps, &prefix) {
+                            eprintln!("Failed to export per-lap DOTs for car {}: {}", i + 1, e);
                         } else {
-                            for (lap, node) in &path_info.pit_stops {
-                                println!("  Lap: {}, Checkpoint: {}", lap.to_string().color(Color::Yellow), node.to_string().color(Color::Yellow));
-                            }
+                            println!("Saved per-lap DOTs under {}", "images/".green());
+                            println!("Render with: dot -Tsvg images/{}_lap1.dot -o images/{}_lap1.svg", prefix, prefix);
                         }
                         
                         println!("\n--- Visualizing Car {}'s Journey ---", (i + 1).to_string().color(car_color));
